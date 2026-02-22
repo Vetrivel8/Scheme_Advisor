@@ -1,0 +1,166 @@
+[
+  {
+    "id": 1,
+    "name": "PM Kisan Samman Nidhi",
+    "desc": "Income support of ₹6000 per year to small and marginal farmers.",
+    "category": "Agriculture",
+    "why": ["Farmer", "Low Income"],
+    "docs": ["Aadhaar", "Land Records"]
+  },
+  {
+    "id": 2,
+    "name": "Soil Health Card Scheme",
+    "desc": "Provides soil health cards to farmers for better crop productivity.",
+    "category": "Agriculture",
+    "why": ["Farmer"],
+    "docs": ["Aadhaar"]
+  },
+  {
+    "id": 3,
+    "name": "Pradhan Mantri Fasal Bima Yojana",
+    "desc": "Crop insurance scheme to protect farmers against crop loss.",
+    "category": "Agriculture",
+    "why": ["Farmer"],
+    "docs": ["Aadhaar", "Bank Passbook"]
+  },
+  {
+    "id": 4,
+    "name": "Kisan Credit Card",
+    "desc": "Provides affordable credit to farmers for agricultural needs.",
+    "category": "Agriculture",
+    "why": ["Farmer"],
+    "docs": ["Aadhaar", "Land Records"]
+  },
+
+  {
+    "id": 5,
+    "name": "National Scholarship Portal Scheme",
+    "desc": "Financial assistance for students from economically weaker sections.",
+    "category": "Education",
+    "why": ["Student", "Low Income"],
+    "docs": ["Aadhaar", "Income Certificate", "Bonafide Certificate"]
+  },
+  {
+    "id": 6,
+    "name": "Post Matric Scholarship",
+    "desc": "Scholarship for SC/ST/OBC students studying post-matric courses.",
+    "category": "Education",
+    "why": ["Student"],
+    "docs": ["Caste Certificate", "Income Certificate"]
+  },
+  {
+    "id": 7,
+    "name": "Mid Day Meal Scheme",
+    "desc": "Provides free meals to school children to encourage education.",
+    "category": "Education",
+    "why": ["Student"],
+    "docs": ["School ID"]
+  },
+  {
+    "id": 8,
+    "name": "Digital India Internship Scheme",
+    "desc": "Internship opportunities for students in digital governance projects.",
+    "category": "Education",
+    "why": ["Student"],
+    "docs": ["College ID", "Resume"]
+  },
+
+  {
+    "id": 9,
+    "name": "Pradhan Mantri Jan Dhan Yojana",
+    "desc": "Financial inclusion scheme for opening zero balance bank accounts.",
+    "category": "Social Welfare",
+    "why": ["Low Income"],
+    "docs": ["Aadhaar"]
+  },
+  {
+    "id": 10,
+    "name": "Atal Pension Yojana",
+    "desc": "Pension scheme for unorganized sector workers.",
+    "category": "Social Welfare",
+    "why": ["Low Income", "Elderly"],
+    "docs": ["Aadhaar", "Bank Passbook"]
+  },
+  {
+    "id": 11,
+    "name": "National Social Assistance Programme",
+    "desc": "Financial support to elderly, widows, and disabled citizens.",
+    "category": "Social Welfare",
+    "why": ["Elderly", "Disabled"],
+    "docs": ["Aadhaar", "Income Certificate"]
+  },
+  {
+    "id": 12,
+    "name": "Pradhan Mantri Awas Yojana",
+    "desc": "Affordable housing scheme for economically weaker sections.",
+    "category": "Social Welfare",
+    "why": ["Low Income"],
+    "docs": ["Aadhaar", "Income Certificate"]
+  },
+
+  {
+    "id": 13,
+    "name": "Pradhan Mantri Kaushal Vikas Yojana",
+    "desc": "Skill development training for youth to improve employability.",
+    "category": "Employment",
+    "why": ["Unemployed", "Youth"],
+    "docs": ["Aadhaar"]
+  },
+  {
+    "id": 14,
+    "name": "Mahatma Gandhi National Rural Employment Guarantee Act",
+    "desc": "Guarantees 100 days of wage employment to rural households.",
+    "category": "Employment",
+    "why": ["Low Income"],
+    "docs": ["Job Card", "Aadhaar"]
+  },
+  {
+    "id": 15,
+    "name": "Startup India Scheme",
+    "desc": "Support and incentives for startups and entrepreneurs.",
+    "category": "Employment",
+    "why": ["Entrepreneur"],
+    "docs": ["Business Registration"]
+  },
+  {
+    "id": 16,
+    "name": "Stand Up India Scheme",
+    "desc": "Loans for SC/ST and women entrepreneurs.",
+    "category": "Employment",
+    "why": ["Woman", "Entrepreneur"],
+    "docs": ["Aadhaar", "Business Proof"]
+  },
+
+  {
+    "id": 17,
+    "name": "Pradhan Mantri Matru Vandana Yojana",
+    "desc": "Maternity benefit scheme for pregnant and lactating women.",
+    "category": "Women",
+    "why": ["Woman"],
+    "docs": ["Aadhaar", "Pregnancy Certificate"]
+  },
+  {
+    "id": 18,
+    "name": "Beti Bachao Beti Padhao",
+    "desc": "Scheme to promote girl child education and welfare.",
+    "category": "Women",
+    "why": ["Woman", "Girl Child"],
+    "docs": ["Birth Certificate"]
+  },
+  {
+    "id": 19,
+    "name": "Ujjwala Yojana",
+    "desc": "Provides free LPG connections to women from BPL households.",
+    "category": "Women",
+    "why": ["Woman", "Low Income"],
+    "docs": ["Aadhaar", "BPL Card"]
+  },
+  {
+    "id": 20,
+    "name": "Mahila Shakti Kendra",
+    "desc": "Empowers rural women through skill development and support.",
+    "category": "Women",
+    "why": ["Woman"],
+    "docs": ["Aadhaar"]
+  }
+]
