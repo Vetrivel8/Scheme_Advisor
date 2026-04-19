@@ -1,16 +1,47 @@
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    @apply font-sans bg-surface text-on-surface antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+  }
 }
 
-body {
-  margin: 0;
-  padding: 0;
-  font-family: system-ui, -apple-system, sans-serif;
+@layer components {
+  /* No-Line Rule: Sections use background color shifts instead of borders */
+  .section-tonal {
+    @apply bg-surface-container border-none;
+  }
+
+  .card-tonal {
+    @apply bg-surface-container-low rounded-2xl p-6 transition-all duration-300;
+  }
+
+  .card-tonal:hover {
+    @apply bg-surface-container-high;
+  }
+
+  /* Editorial Typography */
+  .display-md {
+    @apply text-5xl md:text-6xl font-extrabold leading-tight;
+  }
+
+  .headline-sm {
+    @apply text-2xl font-bold;
+  }
 }
