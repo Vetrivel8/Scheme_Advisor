@@ -25,6 +25,12 @@ const initDB = async () => {
         await db.createCollection('users');
         console.log("Created 'users' collection.");
       }
+      
+      if (!collectionNames.includes('otps')) {
+        await db.createCollection('otps');
+        console.log("Created 'otps' collection.");
+      }
+
     } catch (e) {
       console.warn("Could not dynamically check/create Astra DB collections. Missing permissions or incorrect token?", e.message);
     }
@@ -73,3 +79,6 @@ app.get('/api/schemes/:id', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+module.exports = app;
+

@@ -22,7 +22,7 @@ export default function AllSchemes() {
     fetch();
   }, []);
 
-  const filtered = schemes.filter(s => 
+  const filtered = schemes.filter(s =>
     s.title.en.toLowerCase().includes(search.toLowerCase()) ||
     s.category.some(c => c.toLowerCase().includes(search.toLowerCase()))
   );
@@ -36,14 +36,14 @@ export default function AllSchemes() {
               The Complete <span className="text-secondary italic">Registry</span>
             </h2>
             <p className="text-on-surface-variant max-w-xl leading-relaxed">
-              Explore every government scheme currently defined in our database, 
+              Explore every government scheme currently defined in our database,
               from rural employment to digital internships.
             </p>
           </div>
           <div className="relative w-full md:w-96">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Search by name or category..."
               className="w-full pl-12 pr-6 py-4 bg-white border border-gray-100 rounded-2xl shadow-sm focus:ring-4 focus:ring-primary/5 outline-none transition-all"
               value={search}
@@ -55,9 +55,9 @@ export default function AllSchemes() {
 
       <div className="max-w-7xl mx-auto">
         {loading ? (
-           <div className="flex justify-center py-20">
-             <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-           </div>
+          <div className="flex justify-center py-20">
+            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
         ) : filtered.length === 0 ? (
           <div className="card-tonal p-20 text-center">
             <h3 className="text-xl font-bold">No results for "{search}"</h3>

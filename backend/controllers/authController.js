@@ -3,8 +3,8 @@ const jwt = require('jsonwebtoken');
 const connectDB = require('../config/db');
 const sendEmail = require('../utils/sendEmail');
 
-// In-memory store for OTPs
-const otpStore = new Map();
+// OTP Store replaced by Astra DB 'otps' collection for Vercel/Serverless support
+
 
 // Register a new user
 const registerUser = async (req, res) => {
@@ -42,8 +42,11 @@ const registerUser = async (req, res) => {
     // Generate 6 digit OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Store OTP in memory
-    otpStore.set(email, {
+    // Store OTP in database
+    const otpsCollection = db.collection('otps');
+    await otpsCollection.deleteOne({ email }); // Remove any existing OTP for this email
+    await otpsCollection.insertOne({
+      email,
       otp,
       createdAt: Date.now()
     });
@@ -77,7 +80,8 @@ const verifyOTP = async (req, res) => {
   try {
     const usersCollection = db.collection('users');
 
-    const otpDoc = otpStore.get(email);
+    const otpsCollection = db.collection('otps');
+    const otpDoc = await otpsCollection.findOne({ email });
 
     if (!otpDoc || otpDoc.otp !== otp) {
       return res.status(400).json({ message: 'Invalid or expired OTP' });
@@ -85,8 +89,8 @@ const verifyOTP = async (req, res) => {
 
     // Check if OTP is expired (5 minutes = 300000 ms)
     const now = Date.now();
-    if (now - otpDoc.createdAt > 300000) {
-      otpStore.delete(email);
+    if (now - (otpDoc.createdAt || 0) > 300000) {
+      await otpsCollection.deleteOne({ email });
       return res.status(400).json({ message: 'OTP has expired. Please register again or request new OTP' });
     }
 
@@ -96,8 +100,8 @@ const verifyOTP = async (req, res) => {
       { $set: { isVerified: true } }
     );
 
-    // Delete the OTP from memory
-    otpStore.delete(email);
+    // Delete the OTP from database
+    await otpsCollection.deleteOne({ email });
 
     res.status(200).json({ message: 'Account verified successfully' });
   } catch (error) {

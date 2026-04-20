@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { LanguageProvider } from "./context/LanguageContext";
 import Navbar from "./components/Navbar";
 import Chatbot from "./components/Chatbot";
 import ScrollToTop from "./components/ScrollToTop";
@@ -16,6 +17,7 @@ import AllSchemes from "./pages/AllSchemes";
 
 function App() {
   return (
+    <LanguageProvider>
     <BrowserRouter>
       <ScrollToTop />
       <Navbar />
@@ -39,6 +41,7 @@ function App() {
       <Chatbot />
 
     </BrowserRouter>
+    </LanguageProvider>
   );
 }
 

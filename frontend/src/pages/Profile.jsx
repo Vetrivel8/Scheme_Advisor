@@ -482,9 +482,9 @@ export default function Profile() {
                       <div key={s.id} className="p-8 flex flex-col md:flex-row md:items-center justify-between hover:bg-gray-50/50 transition-all group">
                         <div className="mb-4 md:mb-0">
                           <h4 className="text-lg font-black text-gray-900 group-hover:text-primary transition-colors mb-1">{s.title.en}</h4>
-                          <p className="text-xs text-gray-500 font-bold uppercase tracking-widest flex items-center gap-2">
-                             <div className="w-1.5 h-1.5 rounded-full bg-primary" /> {s.department.en || "Central Government"}
-                          </p>
+                          <span className="text-xs text-gray-500 font-bold uppercase tracking-widest flex items-center gap-2">
+                             <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" /> {s.department.en || "Central Government"}
+                          </span>
                         </div>
                         <div className="flex items-center gap-4">
                           <button onClick={() => navigate(`/scheme/${s.id}`)} className="px-5 py-2.5 bg-white border border-gray-200 text-gray-700 font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-gray-50 transition-all">View Entry</button>

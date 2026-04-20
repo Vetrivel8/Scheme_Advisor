@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { User, Bell, LogOut, Activity, Briefcase, ChevronDown, LayoutDashboard, Bookmark } from "lucide-react";
+import { User, Bell, LogOut, Activity, Briefcase, ChevronDown, LayoutDashboard, Bookmark, Languages } from "lucide-react";
+import { useLang } from "../context/LanguageContext";
 
 export default function Navbar() {
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const { lang, toggleLang } = useLang();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -79,6 +81,18 @@ export default function Navbar() {
             </div>
           ) : (
             <div className="flex items-center gap-4 ml-4">
+              {/* Language Toggle */}
+              <button
+                onClick={toggleLang}
+                title={lang === "en" ? "Switch to Tamil" : "Switch to English"}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-gray-200 hover:border-primary/50 hover:bg-primary/5 transition-all text-gray-500 hover:text-primary"
+              >
+                <Languages size={15} />
+                <span className="text-[11px] font-black uppercase tracking-widest">
+                  {lang === "en" ? "EN" : "தமிழ்"}
+                </span>
+              </button>
+
               <div className="relative" ref={notifRef}>
                 <button 
                   onClick={() => setNotifOpen(!notifOpen)}
