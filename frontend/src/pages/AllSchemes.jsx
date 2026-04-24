@@ -141,33 +141,6 @@ export default function AllSchemes() {
             <p className="text-gray-500 font-medium text-lg leading-relaxed">
               {t.allSchemesDesc} {schemes.length} {t.activePrograms}
             </p>
-
-            {/* Magic Fill Area (Level 2 AI) */}
-            <div className="mt-8 p-6 bg-primary/5 border border-primary/10 rounded-[2.5rem] space-y-4 max-w-xl">
-              <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-widest">
-                <Sparkles size={16} /> {t.magicFill}
-              </div>
-              <div className="flex gap-4">
-                <input
-                  id="magicBrowseInput"
-                  placeholder={t.magicFillPlaceholder}
-                  className="flex-1 bg-white border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium outline-none focus:border-primary transition-all shadow-sm"
-                />
-                <button
-                  onClick={() => {
-                    const text = document.getElementById('magicBrowseInput').value.toLowerCase();
-                    const keywords = ["farmer", "student", "employee", "woman", "elderly", "pvtg", "sc", "st", "obc", "general"];
-                    const found = keywords.filter(k => text.includes(k));
-                    if (found.length > 0) {
-                      setSearch(found.join(" "));
-                    }
-                  }}
-                  className="px-6 py-3 bg-primary text-white text-xs font-black uppercase tracking-widest rounded-2xl hover:shadow-lg transition-all"
-                >
-                  {t.magicFill}
-                </button>
-              </div>
-            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-4 pt-4 lg:pt-0">
