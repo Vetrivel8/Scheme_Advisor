@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 
 const app = express();
 
@@ -64,6 +65,7 @@ initDB();
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
+app.use('/api/chat', chatRoutes);
 
 // ─── Schemes ──────────────────────────────────────────────────────────────────
 // Use require() instead of fs.readFileSync so the file is bundled at

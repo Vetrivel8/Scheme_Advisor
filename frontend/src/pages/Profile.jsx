@@ -23,10 +23,15 @@ import {
 } from "lucide-react";
 import axios from "../api/axios";
 import { addNotification } from "../utils/notifications";
+import { useLang } from "../context/LanguageContext";
+import { translations } from "../utils/translations";
 
 export default function Profile() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { lang } = useLang();
+  const t = translations[lang];
+
   const queryParams = new URLSearchParams(location.search);
   const activeTab = queryParams.get("tab") || "overview";
 
@@ -75,8 +80,8 @@ export default function Profile() {
 
     // Simple mock data for tracking
     const mockApps = [
-      { id: 1, name: "PM Kisan Scheme", status: "Under Review", date: "12 Oct 2023", color: "blue" },
-      { id: 2, name: "Student Scholarship", status: "Approved", date: "05 Sept 2023", color: "green" }
+      { id: 1, name: "PM Kisan Scheme", status: t.underReview, date: "12 Oct 2023", color: "blue" },
+      { id: 2, name: "Student Scholarship", status: t.approved, date: "05 Sept 2023", color: "green" }
     ];
 
     setUser(userData);
@@ -98,28 +103,28 @@ export default function Profile() {
     fetchSchemes();
 
     const loadNotifs = () => {
-      const stored = JSON.parse(localStorage.getItem("userNotifications") || "[]");
-      setNotifications(stored);
+      const storedNotifications = JSON.parse(localStorage.getItem("userNotifications") || "[]");
+      setNotifications(storedNotifications);
     };
     loadNotifs();
     window.addEventListener("notificationsUpdated", loadNotifs);
     return () => window.removeEventListener("notificationsUpdated", loadNotifs);
-  }, [navigate]);
+  }, [navigate, t.underReview, t.approved]);
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="flex flex-col items-center gap-4">
         <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-gray-500 font-medium">Loading your profile...</p>
+        <p className="text-gray-500 font-medium">{t.synchronizing || "Loading your profile..."}</p>
       </div>
     </div>
   );
 
   const tabs = [
-    { id: "overview", label: "My Overview", icon: LayoutDashboard },
-    { id: "details", label: "My Details", icon: User },
-    { id: "saved", label: "Saved Schemes", icon: Bookmark },
-    { id: "tracking", label: "Track Application", icon: Briefcase },
+    { id: "overview", label: t.myOverview, icon: LayoutDashboard },
+    { id: "details", label: t.myDetails, icon: User },
+    { id: "saved", label: t.savedSchemes, icon: Bookmark },
+    { id: "tracking", label: t.trackApplication, icon: Briefcase },
   ];
 
   const handleLogout = () => {
@@ -131,22 +136,19 @@ export default function Profile() {
   const recommended = allSchemes.filter(s => {
     if (!profileData) return false;
     
-    // 1. Age Check
     const uAge = parseInt(profileData.age);
     if (!isNaN(uAge)) {
       if ((s.minAge !== null && uAge < s.minAge) || (s.maxAge !== null && uAge > s.maxAge)) return false;
     }
 
-    // 2. Income Check
     const uIncome = parseInt(profileData.income);
     if (!isNaN(uIncome) && s.maxIncome !== null && uIncome > s.maxIncome) return false;
 
-    // 3. Occupation / Category Mapping
     const occValue = String(profileData.occupation || "").toLowerCase().trim();
-    if (!occValue) return true; // Show general if no occupation
+    if (!occValue) return true;
 
     const cats = (Array.isArray(s.category) ? s.category : [s.category]).map(c => String(c).toLowerCase().trim());
-    const tags = (Array.isArray(s.tags) ? s.tags : []).map(t => String(t).toLowerCase().trim());
+    const tags = (Array.isArray(s.tags) ? s.tags : []).map(tag => String(tag).toLowerCase().trim());
     
     const occMapping = {
       "farmer": "agriculture",
@@ -160,6 +162,11 @@ export default function Profile() {
     return cats.includes(mappedCat) || tags.includes(occValue) || cats.includes("social welfare");
   }).slice(0, 3);
 
+  const translateValue = (val) => {
+    if (!val) return t.notSpecified;
+    return t[val.toLowerCase()] || val;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top Welcome Bar */}
@@ -170,22 +177,22 @@ export default function Profile() {
               {user?.name?.[0]?.toUpperCase()}
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Namaste, {user?.name}!</h1>
-              <p className="text-sm text-gray-500">Welcome to your scheme advisor portal.</p>
+              <h1 className="text-xl font-bold text-gray-900">{t.namaste}, {user?.name}!</h1>
+              <p className="text-sm text-gray-500">{t.welcomePortal}</p>
             </div>
           </div>
           <button 
             onClick={handleLogout}
             className="flex items-center gap-2 text-sm font-semibold text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg transition-colors"
           >
-            <LogOut size={18} /> Logout
+            <LogOut size={18} /> {t.signOut}
           </button>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* Simple Side Navigation */}
+        {/* Side Navigation */}
         <nav className="lg:col-span-3 flex flex-col gap-2">
           {tabs.map(tab => (
             <button
@@ -214,48 +221,48 @@ export default function Profile() {
               <div className="bg-gradient-to-r from-primary to-blue-700 p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full translate-x-1/2 -translate-y-1/2 blur-3xl pointer-events-none" />
                 <div className="relative z-10">
-                  <h2 className="text-sm font-black uppercase tracking-[0.2em] mb-2 text-blue-100">Profile Intelligence Summary</h2>
+                  <h2 className="text-sm font-black uppercase tracking-[0.2em] mb-2 text-blue-100">{t.profileIntelligence}</h2>
                   <p className="text-2xl font-bold mb-4 leading-tight">
                     {profileData 
-                      ? `Based on your ${profileData.occupation} profile in ${profileData.location}, you are optimized for ${recommended.length}+ key national schemes.`
-                      : "Complete your profile to unlock personalized scheme strategies."}
+                      ? `${t.basedOnProfile} ${translateValue(profileData.occupation)} ${t.of} ${translateValue(profileData.location)}, ${t.schemesFound}`
+                      : t.personalizedStrategy}
                   </p>
                   <div className="flex flex-wrap gap-4 mt-6">
                     <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10">
-                      <p className="text-[10px] font-black uppercase text-blue-100">Saved Schemes</p>
+                      <p className="text-[10px] font-black uppercase text-blue-100">{t.savedSchemes}</p>
                       <p className="text-lg font-black">{savedSchemes.length}</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10">
-                      <p className="text-[10px] font-black uppercase text-blue-100">Live Applications</p>
+                      <p className="text-[10px] font-black uppercase text-blue-100">{t.liveApps}</p>
                       <p className="text-lg font-black">{applications.length}</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10">
-                      <p className="text-[10px] font-black uppercase text-blue-100">Required Docs</p>
-                      <p className="text-lg font-black">3 Verified</p>
+                      <p className="text-[10px] font-black uppercase text-blue-100">{t.requiredDocs}</p>
+                      <p className="text-lg font-black">3 {t.verified}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Detailed Information Overview */}
+                {/* Identity Overview */}
                 <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-lg font-black text-gray-800 flex items-center gap-2 uppercase tracking-tight">
-                      <User size={20} className="text-primary" /> Identity Overview
+                      <User size={20} className="text-primary" /> {t.identityOverview}
                     </h2>
                   </div>
                   <div className="grid grid-cols-2 gap-y-6 gap-x-8">
-                    <InfoBlock icon={Calendar} label="Age Profile" value={profileData?.age ? `${profileData.age} Years` : "N/A"} />
-                    <InfoBlock icon={IndianRupee} label="Income Bracket" value={profileData?.income ? `₹${profileData.income}` : "N/A"} />
-                    <InfoBlock icon={Briefcase} label="Current Role" value={profileData?.occupation || "N/A"} />
-                    <InfoBlock icon={MapPin} label="Geographics" value={profileData?.location || "N/A"} />
-                    <InfoBlock icon={Home} label="Resident Type" value={profileData?.residence || "N/A"} />
-                    <InfoBlock icon={Users} label="Social Category" value={profileData?.category || "N/A"} />
+                    <InfoBlock icon={Calendar} label={t.ageProfile} value={profileData?.age ? `${profileData.age} ${t.years}` : t.notSpecified} />
+                    <InfoBlock icon={IndianRupee} label={t.incomeBracket} value={profileData?.income ? `₹${profileData.income}` : t.notSpecified} />
+                    <InfoBlock icon={Briefcase} label={t.currentRole} value={translateValue(profileData?.occupation)} />
+                    <InfoBlock icon={MapPin} label={t.geographics} value={translateValue(profileData?.location)} />
+                    <InfoBlock icon={Home} label={t.residentType} value={translateValue(profileData?.residence)} />
+                    <InfoBlock icon={Users} label={t.socialCategory} value={translateValue(profileData?.category)} />
                   </div>
                 </div>
 
-                {/* Chatbot Scheme Suggestions */}
+                {/* Assistant Suggestions */}
                 <div 
                   onClick={() => document.getElementById('chatbot-toggle')?.click()} 
                   className="group relative bg-white p-8 rounded-2xl border border-gray-200 shadow-sm cursor-pointer hover:shadow-xl hover:border-primary/30 transition-all overflow-hidden"
@@ -267,24 +274,24 @@ export default function Profile() {
                     <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform">
                       <MessageCircle size={24} />
                     </div>
-                    <h2 className="text-xl font-black text-gray-900 mb-2">Scheme Assistant</h2>
+                    <h2 className="text-xl font-black text-gray-900 mb-2">{t.schemeAssistant}</h2>
                     <p className="text-sm text-gray-500 font-medium mb-8 leading-relaxed">
-                      Get instant personalized scheme suggestions based on your profile details. Our AI analyzes your eligibility in real-time.
+                      {t.assistantDesc}
                     </p>
                     <div className="inline-flex items-center gap-3 px-5 py-3 bg-gray-50 rounded-xl border border-gray-100 text-xs font-black text-primary uppercase tracking-widest group-hover:bg-primary group-hover:text-white transition-colors">
-                      Activate Assistant <ChevronRight size={14} />
+                      {t.activateAssistant} <ChevronRight size={14} />
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Enhanced Schemes For You Section */}
+              {/* Tailored Schemes */}
               <section className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm relative">
                 <div className="flex items-center justify-between mb-8">
                   <h2 className="text-lg font-black text-gray-800 flex items-center gap-2 uppercase tracking-tight">
-                    <CheckCircle2 size={20} className="text-green-500" /> Schemes Tailored For You
+                    <CheckCircle2 size={20} className="text-green-500" /> {t.tailoredForYou}
                   </h2>
-                  <Link to="/results" className="text-sm font-bold text-primary hover:underline">Explore More Matches</Link>
+                  <Link to="/results" className="text-sm font-bold text-primary hover:underline">{t.exploreMoreMatches}</Link>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {recommended.map(s => (
@@ -292,37 +299,37 @@ export default function Profile() {
                       <div className="w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center text-primary mb-4 group-hover:bg-primary group-hover:text-white transition-all">
                         <FileText size={16} />
                       </div>
-                      <h3 className="font-extrabold text-gray-900 group-hover:text-primary mb-2 line-clamp-1">{s.title.en}</h3>
-                      <p className="text-xs text-gray-500 line-clamp-2 font-medium mb-6 leading-relaxed">{s.benefits.en}</p>
+                      <h3 className="font-extrabold text-gray-900 group-hover:text-primary mb-2 line-clamp-1">{s.title[lang] || s.title.en}</h3>
+                      <p className="text-xs text-gray-500 line-clamp-2 font-medium mb-6 leading-relaxed">{s.benefits[lang] || s.benefits.en}</p>
                       <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-black text-primary uppercase tracking-widest">Learn More</span>
+                        <span className="text-[10px] font-black text-primary uppercase tracking-widest">{t.learnMore}</span>
                         <ChevronRight size={14} className="text-primary translate-x-[-4px] group-hover:translate-x-0 transition-transform" />
                       </div>
                     </div>
                   ))}
                   {recommended.length === 0 && (
                     <div className="col-span-full py-12 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                      <p className="text-gray-400 font-bold mb-4">No specific matches discovered for your current dossier.</p>
+                      <p className="text-gray-400 font-bold mb-4">{t.noSpecificMatches}</p>
                       <button 
                         onClick={() => navigate('/profile?tab=details')}
                         className="bg-primary text-white px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:scale-105 transition-all inline-block"
                       >
-                        Populate My Dossier
+                        {t.populateDossier}
                       </button>
                     </div>
                   )}
                 </div>
               </section>
 
-              {/* Simple Notifications & History List */}
+              {/* Activity History */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-4">
                   <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                    <Bell size={16} /> Recent Updates
+                    <Bell size={16} /> {t.recentUpdates}
                   </h3>
                   <div className="bg-white p-6 rounded-2xl border border-gray-100 space-y-4 max-h-[300px] overflow-y-auto">
                     {notifications.length === 0 ? (
-                      <p className="text-xs text-gray-400 font-medium text-center py-8">No recent activity found.</p>
+                      <p className="text-xs text-gray-400 font-medium text-center py-8">{t.noRecentActivity}</p>
                     ) : (
                       notifications.slice(0, 5).map(n => (
                         <div key={n.id} className="flex gap-4">
@@ -340,16 +347,16 @@ export default function Profile() {
 
                 <div className="space-y-4">
                   <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                    <Clock size={16} /> Recently Viewed
+                    <Clock size={16} /> {t.recentlyViewed}
                   </h3>
                   <div className="bg-white p-2 rounded-2xl border border-gray-100 divide-y divide-gray-50">
                     {allSchemes.filter(s => history.includes(s.id)).slice(0, 3).map(s => (
                       <div key={s.id} onClick={() => navigate(`/scheme/${s.id}`)} className="p-4 flex items-center justify-between hover:bg-gray-50 cursor-pointer">
-                        <span className="text-sm font-medium text-gray-700 truncate pr-4">{s.title.en}</span>
+                        <span className="text-sm font-medium text-gray-700 truncate pr-4">{s.title[lang] || s.title.en}</span>
                         <ChevronRight size={14} className="text-gray-300" />
                       </div>
                     ))}
-                    {history.length === 0 && <p className="p-6 text-gray-400 text-sm text-center">Empty</p>}
+                    {history.length === 0 && <p className="p-6 text-gray-400 text-sm text-center">{t.empty}</p>}
                   </div>
                 </div>
               </div>
@@ -361,7 +368,7 @@ export default function Profile() {
             <div className="space-y-8 animate-in fade-in duration-300">
               <div className="bg-white p-10 rounded-2xl border border-gray-200">
                 <div className="flex items-center justify-between mb-10">
-                  <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">My Full Profile Dossier</h2>
+                  <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">{t.fullProfileDossier}</h2>
                   {!isEditing ? (
                     <button 
                       onClick={() => {
@@ -370,7 +377,7 @@ export default function Profile() {
                       }}
                       className="px-6 py-2.5 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:shadow-lg transition-all"
                     >
-                      Edit Dossier
+                      {t.editDossier}
                     </button>
                   ) : (
                     <div className="flex gap-2">
@@ -378,13 +385,13 @@ export default function Profile() {
                         onClick={() => setIsEditing(false)}
                         className="px-6 py-2.5 bg-gray-100 text-gray-500 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-gray-200 transition-all"
                       >
-                        Cancel
+                        {t.cancel}
                       </button>
                       <button 
                         onClick={handleSaveProfile}
                         className="px-6 py-2.5 bg-green-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:shadow-lg transition-all"
                       >
-                        Save Changes
+                        {t.saveChanges}
                       </button>
                     </div>
                   )}
@@ -393,47 +400,47 @@ export default function Profile() {
                 {isEditing ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-4">
-                      <EditInput label="Current Occupation / Job" name="occupation" value={editForm.occupation} onChange={handleEditChange} />
-                      <EditInput label="Physical Geography / Location" name="location" value={editForm.location} onChange={handleEditChange} />
-                      <EditInput label="Residence Type (Urban/Rural)" name="residence" value={editForm.residence} onChange={handleEditChange} />
+                      <EditInput label={t.occupation} name="occupation" value={editForm.occupation} onChange={handleEditChange} placeholder={t.selectRole} />
+                      <EditInput label={t.location} name="location" value={editForm.location} onChange={handleEditChange} placeholder={t.locationPlaceholder} />
+                      <EditInput label={t.areaOfResidence} name="residence" value={editForm.residence} onChange={handleEditChange} placeholder={t.urban} />
                     </div>
                     <div className="space-y-4">
-                      <EditInput label="Current Age" name="age" type="number" value={editForm.age} onChange={handleEditChange} />
-                      <EditInput label="Annual Income Bracket (₹)" name="income" type="number" value={editForm.income} onChange={handleEditChange} />
-                      <EditInput label="Social Category (General/OBC/SC/ST)" name="category" value={editForm.category} onChange={handleEditChange} />
+                      <EditInput label={t.age} name="age" type="number" value={editForm.age} onChange={handleEditChange} placeholder="25" />
+                      <EditInput label={t.annualIncome} name="income" type="number" value={editForm.income} onChange={handleEditChange} placeholder="500000" />
+                      <EditInput label={t.category} name="category" value={editForm.category} onChange={handleEditChange} placeholder="General" />
                     </div>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
                     <div className="space-y-10">
-                      <DetailItem label="Account Name" value={user?.name} icon={User} />
-                      <DetailItem label="Primary Email" value={user?.email} icon={FileText} />
-                      <DetailItem label="Social Category" value={profileData?.category || "Not Specified"} icon={Users} />
-                      <DetailItem label="System Role" value={profileData?.occupation || "Not Specified"} icon={Briefcase} />
+                      <DetailItem label={t.accountName} value={user?.name} icon={User} />
+                      <DetailItem label={t.primaryEmail} value={user?.email} icon={FileText} />
+                      <DetailItem label={t.socialCategory} value={translateValue(profileData?.category)} icon={Users} />
+                      <DetailItem label={t.systemRole} value={translateValue(profileData?.occupation)} icon={Briefcase} />
                     </div>
                     <div className="space-y-10">
-                      <DetailItem label="Geography" value={`${profileData?.location || "Not Specified"} (${profileData?.residence || "N/A"})`} icon={MapPin} />
-                      <DetailItem label="Economic Bracket" value={profileData?.income ? `₹${profileData.income} / Year` : "N/A"} icon={IndianRupee} />
-                      <DetailItem label="Age Maturity" value={profileData?.age ? `${profileData.age} Years` : "N/A"} icon={Calendar} />
-                      <DetailItem label="Account Created" value="April 19, 2026" icon={Clock} />
+                      <DetailItem label={t.geographics} value={`${translateValue(profileData?.location)} (${translateValue(profileData?.residence)})`} icon={MapPin} />
+                      <DetailItem label={t.economicBracket} value={profileData?.income ? `₹${profileData.income} / ${t.years}` : t.notSpecified} icon={IndianRupee} />
+                      <DetailItem label={t.ageMaturity} value={profileData?.age ? `${profileData.age} ${t.years}` : t.notSpecified} icon={Calendar} />
+                      <DetailItem label={t.accountCreated} value="April 19, 2026" icon={Clock} />
                     </div>
                   </div>
                 )}
 
                 <div className="mt-16 p-8 bg-gray-50 rounded-2xl border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6">
                   <div>
-                    <h4 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-1">Knowledge Management</h4>
-                    <p className="text-xs text-gray-500 font-medium italic">You have {savedSchemes.length} schemes bookmarked for quick access.</p>
+                    <h4 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-1">{t.knowledgeMgmt}</h4>
+                    <p className="text-xs text-gray-500 font-medium italic">{savedSchemes.length} {t.schemesBookmarked}</p>
                   </div>
                   <div className="text-[10px] font-black text-primary uppercase tracking-widest border border-primary/20 px-4 py-2 rounded-lg">
-                    Primary Data Source: Profile Dossier
+                    {t.primaryDataSource}
                   </div>
                 </div>
               </div>
 
-              {/* Saved Schemes Mini-Section within Details as requested */}
+              {/* Saved Schemes Quicklink */}
               <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
-                <h3 className="text-sm font-black text-gray-500 uppercase tracking-[0.2em] mb-6">Saved Schemes Quicklink</h3>
+                <h3 className="text-sm font-black text-gray-500 uppercase tracking-[0.2em] mb-6">{t.savedQuicklink}</h3>
                 {savedSchemes.length > 0 ? (
                   <div className="flex flex-wrap gap-3">
                     {allSchemes.filter(s => savedSchemes.includes(s.id)).slice(0, 5).map(s => (
@@ -442,15 +449,15 @@ export default function Profile() {
                         to={`/scheme/${s.id}`}
                         className="px-4 py-2 bg-surface-container-low border border-gray-100 rounded-xl text-xs font-bold text-gray-700 hover:bg-primary/5 hover:text-primary transition-all"
                       >
-                        {s.title.en}
+                        {s.title[lang] || s.title.en}
                       </Link>
                     ))}
                     {savedSchemes.length > 5 && (
-                      <button onClick={() => navigate('/profile?tab=saved')} className="text-xs font-black text-primary hover:underline">+{savedSchemes.length - 5} More</button>
+                      <button onClick={() => navigate('/profile?tab=saved')} className="text-xs font-black text-primary hover:underline">+{savedSchemes.length - 5} {t.results}</button>
                     )}
                   </div>
                 ) : (
-                  <p className="text-xs text-gray-400 italic">No bookmarks found in this section.</p>
+                  <p className="text-xs text-gray-400 italic">{t.noBookmarksFound}</p>
                 )}
               </div>
             </div>
@@ -460,10 +467,10 @@ export default function Profile() {
           {activeTab === 'saved' && (
             <div className="space-y-8 animate-in fade-in duration-300">
                <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">My Secure Vault</h2>
+                  <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">{t.secureVault}</h2>
                   <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-100 rounded-xl shadow-sm">
                     <Bookmark size={16} className="text-primary" />
-                    <span className="text-xs font-black text-gray-900 uppercase tracking-widest">{savedSchemes.length} Total Saved</span>
+                    <span className="text-xs font-black text-gray-900 uppercase tracking-widest">{savedSchemes.length} {t.results}</span>
                   </div>
                </div>
 
@@ -473,21 +480,21 @@ export default function Profile() {
                       <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
                         <Bookmark size={32} className="text-gray-200" />
                       </div>
-                      <h3 className="text-xl font-bold text-gray-800 mb-2">Vault is empty</h3>
-                      <p className="text-gray-400 font-medium mb-8">You haven't saved any schemes to your profile yet.</p>
-                      <Link to="/" className="px-8 py-4 bg-primary text-white font-black text-xs uppercase tracking-widest rounded-xl hover:shadow-xl transition-all inline-block">Explore Schemes</Link>
+                      <h3 className="text-xl font-bold text-gray-800 mb-2">{t.vaultEmpty}</h3>
+                      <p className="text-gray-400 font-medium mb-8">{t.noBookmarksYet}</p>
+                      <Link to="/" className="px-8 py-4 bg-primary text-white font-black text-xs uppercase tracking-widest rounded-xl hover:shadow-xl transition-all inline-block">{t.exploreAll} {t.schemes}</Link>
                     </div>
                   ) : (
                     allSchemes.filter(s => savedSchemes.includes(s.id)).map(s => (
                       <div key={s.id} className="p-8 flex flex-col md:flex-row md:items-center justify-between hover:bg-gray-50/50 transition-all group">
                         <div className="mb-4 md:mb-0">
-                          <h4 className="text-lg font-black text-gray-900 group-hover:text-primary transition-colors mb-1">{s.title.en}</h4>
+                          <h4 className="text-lg font-black text-gray-900 group-hover:text-primary transition-colors mb-1">{s.title[lang] || s.title.en}</h4>
                           <span className="text-xs text-gray-500 font-bold uppercase tracking-widest flex items-center gap-2">
-                             <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" /> {s.department.en || "Central Government"}
+                             <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" /> {s.department[lang] || s.department.en || "Central Government"}
                           </span>
                         </div>
                         <div className="flex items-center gap-4">
-                          <button onClick={() => navigate(`/scheme/${s.id}`)} className="px-5 py-2.5 bg-white border border-gray-200 text-gray-700 font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-gray-50 transition-all">View Entry</button>
+                          <button onClick={() => navigate(`/scheme/${s.id}`)} className="px-5 py-2.5 bg-white border border-gray-200 text-gray-700 font-black text-[10px] uppercase tracking-widest rounded-lg hover:bg-gray-50 transition-all">{t.viewEntry}</button>
                           <button 
                             onClick={() => {
                               addNotification('success', 'Application Started', `You initiated an application for ${s.title.en}.`);
@@ -495,7 +502,7 @@ export default function Profile() {
                             }}
                             className="px-5 py-2.5 bg-primary text-white font-black text-[10px] uppercase tracking-widest rounded-lg hover:shadow-lg shadow-primary/20 transition-all hover:scale-105"
                           >
-                            Proceed to Apply
+                            {t.proceedApply}
                           </button>
                           <button 
                             onClick={() => {
@@ -505,7 +512,7 @@ export default function Profile() {
                               window.location.reload();
                             }}
                             className="p-2 text-gray-300 hover:text-red-500 transition-colors"
-                            title="Remove Bookmark"
+                            title={t.removeBookmark}
                           >
                             <Trash2 size={20}/>
                           </button>
@@ -515,10 +522,10 @@ export default function Profile() {
                   )}
                </div>
 
-               {/* Recently Viewed Items Section */}
+               {/* Recently Interacted */}
                <div className="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm">
                   <h3 className="text-sm font-black text-gray-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
-                    <Clock size={18} className="text-primary" /> Recently Interacted
+                    <Clock size={18} className="text-primary" /> {t.recentlyInteracted}
                   </h3>
                   {history.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -528,13 +535,13 @@ export default function Profile() {
                           onClick={() => navigate(`/scheme/${s.id}`)}
                           className="p-6 bg-gray-50 rounded-2xl border border-gray-100 hover:border-primary transition-all cursor-pointer group"
                         >
-                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Viewed Recently</p>
-                          <h4 className="font-bold text-gray-800 line-clamp-1 mb-2 group-hover:text-primary">{s.title.en}</h4>
+                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">{t.recentlyViewed}</p>
+                          <h4 className="font-bold text-gray-800 line-clamp-1 mb-2 group-hover:text-primary">{s.title[lang] || s.title.en}</h4>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-xs text-gray-400 font-medium italic">Your interaction history will appear here.</p>
+                    <p className="text-xs text-gray-400 font-medium italic">{t.noRecentActivity}</p>
                   )}
                </div>
             </div>
@@ -544,10 +551,10 @@ export default function Profile() {
           {activeTab === 'tracking' && (
             <div className="space-y-8 animate-in fade-in duration-300">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">Application Control Center</h2>
+                <h2 className="text-2xl font-black text-gray-900 uppercase tracking-tighter">{t.applicationControl}</h2>
                 <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-xl border border-blue-100">
                   <Activity size={16} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">System Online</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest">{t.systemOnline}</span>
                 </div>
               </div>
               
@@ -556,10 +563,10 @@ export default function Profile() {
                   <table className="w-full text-left">
                     <thead className="bg-gray-50/50 border-b border-gray-100">
                       <tr>
-                        <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Deployment Scheme</th>
-                        <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Filing Date</th>
-                        <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Application Status</th>
-                        <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">Metrics</th>
+                        <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{t.deploymentScheme}</th>
+                        <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{t.filingDate}</th>
+                        <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{t.appStatus}</th>
+                        <th className="px-10 py-6 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">{t.metrics}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-50">
@@ -568,12 +575,12 @@ export default function Profile() {
                           <td className="px-10 py-8 font-black text-gray-900">{app.name}</td>
                           <td className="px-10 py-8 text-xs font-bold text-gray-500 uppercase">{app.date}</td>
                           <td className="px-10 py-8">
-                             <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${app.status === 'Approved' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
-                               {app.status === 'Approved' ? <CheckCircle2 size={12}/> : <Clock size={12}/>} {app.status}
+                             <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${app.status === t.approved ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                                {app.status === t.approved ? <CheckCircle2 size={12}/> : <Clock size={12}/>} {app.status}
                              </div>
                           </td>
                           <td className="px-10 py-8 text-right">
-                             <button className="px-4 py-2 bg-white border border-gray-100 text-primary font-black text-[10px] uppercase tracking-widest rounded-lg hover:border-primary transition-all">Detailed Log</button>
+                             <button className="px-4 py-2 bg-white border border-gray-100 text-primary font-black text-[10px] uppercase tracking-widest rounded-lg hover:border-primary transition-all">{t.detailedLog}</button>
                           </td>
                         </tr>
                       ))}
@@ -587,15 +594,15 @@ export default function Profile() {
                 <div className="lg:col-span-8 bg-white p-10 rounded-3xl border border-gray-200">
                   <div className="flex items-center justify-between mb-10">
                     <h3 className="text-sm font-black text-gray-500 uppercase tracking-[0.2em] flex items-center gap-3">
-                      <FileText size={20} className="text-primary" /> Compliance Repository
+                      <FileText size={20} className="text-primary" /> {t.complianceRepository}
                     </h3>
-                    <button className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline">+ Batch Upload</button>
+                    <button className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline">+ {t.batchUpload}</button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <DocCard title="National ID (Aadhaar)" status="verified" date="Oct 2023" />
-                    <DocCard title="Fiscal Earnings Cert" status="verified" date="Nov 2023" />
-                    <DocCard title="Educational Credentials" status="pending" date="Processing" />
-                    <DocCard title="Residence Verification" status="missing" date="Action Required" />
+                    <DocCard title="National ID (Aadhaar)" status="verified" date="Oct 2023" t={t} />
+                    <DocCard title="Fiscal Earnings Cert" status="verified" date="Nov 2023" t={t} />
+                    <DocCard title="Educational Credentials" status="pending" date="Processing" t={t} />
+                    <DocCard title="Residence Verification" status="missing" date="Action Required" t={t} />
                   </div>
                 </div>
 
@@ -603,11 +610,11 @@ export default function Profile() {
                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full translate-x-1/2 -translate-y-1/2 blur-2xl" />
                    <div>
                     <AlertCircle size={32} className="text-primary mb-6" />
-                    <h3 className="text-2xl font-black mb-4 leading-tight uppercase tracking-tighter">Diagnostic Analytics</h3>
-                    <p className="text-gray-400 text-xs font-medium leading-relaxed mb-8">Your profile currently meets 85% of documentation requirements for top-tier schemes.</p>
+                    <h3 className="text-2xl font-black mb-4 leading-tight uppercase tracking-tighter">{t.diagnosticAnalytics}</h3>
+                    <p className="text-gray-400 text-xs font-medium leading-relaxed mb-8">{t.docRequirements}</p>
                    </div>
                    <button className="w-full py-4 bg-primary text-white font-black text-xs uppercase tracking-[0.2em] rounded-xl hover:shadow-[0_10px_30px_rgba(var(--primary-rgb),0.3)] transition-all">
-                      Run Smart Health Check
+                      {t.runHealthCheck}
                    </button>
                 </div>
               </div>
@@ -649,11 +656,11 @@ function DetailItem({ label, value, icon: Icon }) {
   );
 }
 
-function DocCard({ title, status, date }) {
+function DocCard({ title, status, date, t }) {
   const styles = {
-    verified: { bg: 'bg-green-50', border: 'border-green-100', text: 'text-green-600', icon: CheckCircle2, label: 'Verified' },
-    pending: { bg: 'bg-blue-50', border: 'border-blue-100', text: 'text-blue-600', icon: Clock, label: 'Pending' },
-    missing: { bg: 'bg-red-50', border: 'border-red-100', text: 'text-red-600', icon: AlertCircle, label: 'Missing' }
+    verified: { bg: 'bg-green-50', border: 'border-green-100', text: 'text-green-600', icon: CheckCircle2, label: t.verified },
+    pending: { bg: 'bg-blue-50', border: 'border-blue-100', text: 'text-blue-600', icon: Clock, label: t.pending },
+    missing: { bg: 'bg-red-50', border: 'border-red-100', text: 'text-red-600', icon: AlertCircle, label: t.missing }
   };
   const s = styles[status];
   return (
@@ -670,7 +677,7 @@ function DocCard({ title, status, date }) {
   );
 }
 
-function EditInput({ label, name, value, onChange, type = "text" }) {
+function EditInput({ label, name, value, onChange, placeholder, type = "text" }) {
   return (
     <div className="space-y-1">
       <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">{label}</label>
@@ -680,7 +687,7 @@ function EditInput({ label, name, value, onChange, type = "text" }) {
         value={value || ""}
         onChange={onChange}
         className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-xl font-bold text-gray-800 focus:bg-white focus:border-primary/50 outline-none transition-all"
-        placeholder={`Enter ${label.toLowerCase()}`}
+        placeholder={placeholder}
       />
     </div>
   );

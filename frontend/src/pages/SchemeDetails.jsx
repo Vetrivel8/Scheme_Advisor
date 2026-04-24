@@ -4,10 +4,12 @@ import { ArrowLeft, Bookmark, Share2, ExternalLink, ShieldCheck, Clock } from "l
 import axios from "../api/axios";
 import { addNotification } from "../utils/notifications";
 import { useLang } from "../context/LanguageContext";
+import { translations } from "../utils/translations";
 
 export default function SchemeDetails() {
   const { id } = useParams();
   const { lang } = useLang();
+  const globalT = translations[lang];
   const [scheme, setScheme] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
@@ -54,27 +56,10 @@ export default function SchemeDetails() {
 
   if (!scheme) return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center">
-      <h2 className="text-2xl font-bold text-gray-800">Scheme Not Found</h2>
-      <Link to="/" className="mt-4 text-primary font-bold">Return Home</Link>
+      <h2 className="text-2xl font-bold text-gray-800">{globalT.noSchemesFound || "Scheme Not Found"}</h2>
+      <Link to="/" className="mt-4 text-primary font-bold">{globalT.home}</Link>
     </div>
   );
-
-  const labels = {
-    back:        lang === "ta" ? "ஆய்வுக்கு திரும்பு"     : "Back to Exploration",
-    eligibility: lang === "ta" ? "தகுதி கட்டமைப்பு"        : "Eligibility Framework",
-    minAge:      lang === "ta" ? "குறைந்தபட்ச வயது"        : "Minimum Age",
-    maxAge:      lang === "ta" ? "அதிகபட்ச வயது"           : "Maximum Age",
-    income:      lang === "ta" ? "வருமான வரம்பு"           : "Income Limit",
-    years:       lang === "ta" ? "ஆண்டுகள்"                : "Years",
-    benefits:    lang === "ta" ? "ஆதரவு மற்றும் நலன்கள்"  : "Support & Benefits",
-    apply:       lang === "ta" ? "விண்ணப்ப நடைமுறை"       : "Application Procedure",
-    ready:       lang === "ta" ? "விண்ணப்பிக்க தயாரா?"    : "Ready to apply?",
-    portal:      lang === "ta" ? "அதிகாரப்பூர்வ இணையதளம்" : "Go to Official Portal",
-    docNote:     lang === "ta" ? "தொடர்வதற்கு முன் ஆவணங்கள் தயாராக இருக்கட்டும்" : "Make sure your documents are ready before proceeding",
-    assist:      lang === "ta" ? "விரைவு உதவி"             : "Fast-Track Assistance",
-    assistDesc:  lang === "ta" ? "இந்த திட்டத்திற்கு உதவி தேவையா? எங்கள் AI ஆலோசகர் இந்த பாதையின் ஆவணங்களை செயலாக்கியுள்ளார்." : "Need help with this specific scheme? Our AI advisor has processed the documentation for this pathway.",
-    analyze:     lang === "ta" ? "என் தகுதியை பகுப்பாய்வு செய்" : "Analyze My Eligibility",
-  };
 
   return (
     <div className="min-h-screen bg-gray-50/50 pb-20">
@@ -82,17 +67,17 @@ export default function SchemeDetails() {
       <div className="bg-white border-b border-gray-100 pt-12 pb-12">
         <div className="max-w-5xl mx-auto px-6">
           <Link to="/" className="inline-flex items-center gap-2 text-primary font-bold text-sm mb-8 hover:gap-3 transition-all">
-            <ArrowLeft size={16} /> {labels.back}
+            <ArrowLeft size={16} /> {globalT.backToExploration}
           </Link>
 
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-8">
             <div className="flex-grow">
               <div className="flex items-center gap-3 mb-4">
                 <span className="px-3 py-1 bg-primary/5 text-primary text-[10px] font-bold uppercase tracking-widest rounded-full border border-primary/10">
-                  Official Portal Path
+                  {globalT.officialPortalPath}
                 </span>
                 <span className="flex items-center gap-1 text-[10px] font-bold text-gray-400">
-                  <Clock size={12} /> Last updated: March 2026
+                  <Clock size={12} /> {globalT.lastUpdated}
                 </span>
               </div>
               <h1 className="text-4xl font-extrabold text-gray-900 leading-tight mb-4">{t("title")}</h1>
@@ -120,26 +105,26 @@ export default function SchemeDetails() {
 
           <section>
             <h2 className="text-sm font-black text-primary uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
-              <ShieldCheck size={18} /> {labels.eligibility}
+              <ShieldCheck size={18} /> {globalT.eligibilityFramework}
             </h2>
             <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm leading-loose text-gray-700">
               {t("eligibility")}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 pt-8 border-t border-gray-50">
                 {scheme.minAge !== null && (
                   <div>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">{labels.minAge}</p>
-                    <p className="text-lg font-bold text-gray-800">{scheme.minAge} {labels.years}</p>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">{globalT.minimumAge}</p>
+                    <p className="text-lg font-bold text-gray-800">{scheme.minAge} {globalT.years}</p>
                   </div>
                 )}
                 {scheme.maxAge !== null && (
                   <div>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">{labels.maxAge}</p>
-                    <p className="text-lg font-bold text-gray-800">{scheme.maxAge || 'None'} {labels.years}</p>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">{globalT.maximumAge}</p>
+                    <p className="text-lg font-bold text-gray-800">{scheme.maxAge || 'None'} {globalT.years}</p>
                   </div>
                 )}
                 {scheme.maxIncome !== null && (
                   <div>
-                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">{labels.income}</p>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">{globalT.incomeLimit}</p>
                     <p className="text-lg font-bold text-gray-800">₹{scheme.maxIncome.toLocaleString()}</p>
                   </div>
                 )}
@@ -148,14 +133,14 @@ export default function SchemeDetails() {
           </section>
 
           <section>
-            <h2 className="text-sm font-black text-primary uppercase tracking-[0.2em] mb-6">{labels.benefits}</h2>
+            <h2 className="text-sm font-black text-primary uppercase tracking-[0.2em] mb-6">{globalT.supportBenefits}</h2>
             <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm leading-loose text-gray-700 italic font-medium">
               "{t("benefits")}"
             </div>
           </section>
 
           <section>
-            <h2 className="text-sm font-black text-primary uppercase tracking-[0.2em] mb-6">{labels.apply}</h2>
+            <h2 className="text-sm font-black text-primary uppercase tracking-[0.2em] mb-6">{globalT.applicationProcedure}</h2>
             <div className="bg-gray-900 text-white p-10 rounded-3xl shadow-2xl relative overflow-hidden">
               <div className="absolute top-0 right-0 w-48 h-48 bg-primary/20 blur-[80px] rounded-full" />
               <p className="relative z-10 leading-relaxed text-blue-100/90 font-medium">
@@ -168,30 +153,30 @@ export default function SchemeDetails() {
         {/* Sidebar */}
         <div className="space-y-8">
           <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-            <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-6">{labels.ready}</h3>
+            <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-6">{globalT.readyToApply}</h3>
             {scheme.link && (
               <a
                 href={scheme.link}
                 target="_blank"
                 rel="noreferrer"
-                onClick={() => addNotification('success', 'Application Initiated', `You've started the application process for ${scheme.title?.en}. Redirecting to official portal.`)}
+                onClick={() => addNotification('success', 'Application Initiated', `You've started the application process for ${t("title")}. Redirecting to official portal.`)}
                 className="w-full py-4 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 mb-4"
               >
-                {labels.portal} <ExternalLink size={16} />
+                {globalT.goToPortal} <ExternalLink size={16} />
               </a>
             )}
             <p className="text-[10px] text-center text-gray-400 font-bold uppercase tracking-widest px-4">
-              {labels.docNote}
+              {globalT.docNote}
             </p>
           </div>
 
           <div className="bg-primary-container/10 p-8 rounded-3xl border border-primary/5">
-            <h3 className="text-sm font-black text-primary uppercase tracking-widest mb-4">{labels.assist}</h3>
+            <h3 className="text-sm font-black text-primary uppercase tracking-widest mb-4">{globalT.fastTrack}</h3>
             <p className="text-xs text-on-surface-variant font-medium leading-loose mb-6">
-              {labels.assistDesc}
+              {lang === "ta" ? "இந்த திட்டத்திற்கு உதவி தேவையா? எங்கள் AI ஆலோசகர் ஆவணங்களை பகுப்பாய்வு செய்துள்ளது." : "Need help with this specific scheme? Our AI advisor has processed the documentation for this pathway."}
             </p>
             <button className="w-full py-3 bg-white text-primary text-xs font-bold rounded-xl border border-primary/10 hover:bg-white/50 transition-all">
-              {labels.analyze}
+              {lang === "ta" ? "என் தகுதியை பகுப்பாய்வு செய்" : "Analyze My Eligibility"}
             </button>
           </div>
         </div>

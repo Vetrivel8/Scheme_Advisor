@@ -1,9 +1,13 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import SchemeCard from "../components/SchemeCard";
 import axios from "../api/axios";
-import { Search, Filter, ArrowUpDown, ChevronLeft, ChevronRight, LayoutGrid } from "lucide-react";
+import { Search, Filter, ArrowUpDown, ChevronLeft, ChevronRight, LayoutGrid, Mic, MicOff, Sparkles } from "lucide-react";
+import { useLang } from "../context/LanguageContext";
+import { translations } from "../utils/translations";
 
 export default function AllSchemes() {
+  const { lang } = useLang();
+  const t = translations[lang];
   const [schemes, setSchemes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -11,6 +15,9 @@ export default function AllSchemes() {
   const [sortBy, setSortBy] = useState("default");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 21;
+
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef(null);
 
   useEffect(() => {
     const fetch = async () => {
@@ -24,7 +31,32 @@ export default function AllSchemes() {
       }
     };
     fetch();
-  }, []);
+
+    // Initialize Speech Recognition
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.lang = lang === 'ta' ? 'ta-IN' : 'en-IN';
+
+      recognitionRef.current.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setSearch(transcript);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onend = () => setIsListening(false);
+    }
+  }, [lang]);
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+    } else {
+      recognitionRef.current?.start();
+      setIsListening(true);
+    }
+  };
 
   // Get unique categories for filter
   const categories = useMemo(() => {
@@ -48,6 +80,7 @@ export default function AllSchemes() {
       const q = search.toLowerCase();
       result = result.filter(s =>
         (s.title?.en?.toLowerCase() || "").includes(q) ||
+        (s.title?.ta?.toLowerCase() || "").includes(q) ||
         (Array.isArray(s.category)
           ? s.category.some(c => c.toLowerCase().includes(q))
           : (s.category?.toLowerCase() || "").includes(q))
@@ -66,10 +99,10 @@ export default function AllSchemes() {
     // Sort
     switch (sortBy) {
       case "name-asc":
-        result.sort((a, b) => a.title.en.localeCompare(b.title.en));
+        result.sort((a, b) => (a.title[lang] || a.title.en).localeCompare(b.title[lang] || b.title.en));
         break;
       case "name-desc":
-        result.sort((a, b) => b.title.en.localeCompare(a.title.en));
+        result.sort((a, b) => (b.title[lang] || b.title.en).localeCompare(a.title[lang] || a.title.en));
         break;
       case "newest":
         result.sort((a, b) => b.id - a.id);
@@ -82,7 +115,7 @@ export default function AllSchemes() {
     }
 
     return result;
-  }, [schemes, search, categoryFilter, sortBy]);
+  }, [schemes, search, categoryFilter, sortBy, lang]);
 
   // Pagination Logic
   const totalPages = Math.ceil(processedSchemes.length / itemsPerPage);
@@ -100,26 +133,61 @@ export default function AllSchemes() {
     <div className="min-h-screen bg-[#FDFDFD] px-4 md:px-8 py-12 md:py-20">
       {/* Header Section */}
       <div className="max-w-7xl mx-auto mb-12">
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12">
+        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-8 mb-8">
           <div className="max-w-2xl">
             <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight mb-4 leading-none">
-              Explore All <span className="text-primary italic">Schemes</span>
+              {t.exploreAll} <span className="text-primary italic">{t.schemes}</span>
             </h1>
             <p className="text-gray-500 font-medium text-lg leading-relaxed">
-              Find the right government support for your needs across {schemes.length} currently active programs.
+              {t.allSchemesDesc} {schemes.length} {t.activePrograms}
             </p>
+
+            {/* Magic Fill Area (Level 2 AI) */}
+            <div className="mt-8 p-6 bg-primary/5 border border-primary/10 rounded-[2.5rem] space-y-4 max-w-xl">
+              <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-widest">
+                <Sparkles size={16} /> {t.magicFill}
+              </div>
+              <div className="flex gap-4">
+                <input
+                  id="magicBrowseInput"
+                  placeholder={t.magicFillPlaceholder}
+                  className="flex-1 bg-white border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium outline-none focus:border-primary transition-all shadow-sm"
+                />
+                <button
+                  onClick={() => {
+                    const text = document.getElementById('magicBrowseInput').value.toLowerCase();
+                    const keywords = ["farmer", "student", "employee", "woman", "elderly", "pvtg", "sc", "st", "obc", "general"];
+                    const found = keywords.filter(k => text.includes(k));
+                    if (found.length > 0) {
+                      setSearch(found.join(" "));
+                    }
+                  }}
+                  className="px-6 py-3 bg-primary text-white text-xs font-black uppercase tracking-widest rounded-2xl hover:shadow-lg transition-all"
+                >
+                  {t.magicFill}
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="relative group">
+          <div className="flex flex-wrap items-center gap-4 pt-4 lg:pt-0">
+            <div className="relative group flex items-center">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary transition-colors" size={18} />
               <input
                 type="text"
-                placeholder="Search schemes..."
-                className="pl-12 pr-6 py-4 bg-white border border-gray-200 rounded-2xl shadow-sm focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all w-full md:w-80 font-medium text-gray-700"
+                placeholder={t.searchSchemes}
+                className="pl-12 pr-12 py-4 bg-white border border-gray-200 rounded-2xl shadow-sm focus:ring-4 focus:ring-primary/5 focus:border-primary outline-none transition-all w-full md:w-80 font-medium text-gray-700"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
+              {/* Voice Search Toggle */}
+              <button 
+                onClick={toggleListening}
+                className={`absolute right-4 top-1/2 -translate-y-1/2 p-1.5 rounded-full transition-all duration-300
+                  ${isListening ? 'bg-red-500 text-white animate-pulse shadow-md' : 'text-gray-400 hover:text-primary hover:bg-primary/5'}`}
+              >
+                {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+              </button>
             </div>
           </div>
         </div>
@@ -133,7 +201,7 @@ export default function AllSchemes() {
               onChange={(e) => setCategoryFilter(e.target.value)}
               className="bg-transparent border-none outline-none font-bold text-sm text-gray-600 focus:ring-0 cursor-pointer capitalize"
             >
-              <option value="All">All Categories</option>
+              <option value="All">{t.allCategories}</option>
               {categories.filter(c => c !== "All").map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
@@ -147,16 +215,16 @@ export default function AllSchemes() {
               onChange={(e) => setSortBy(e.target.value)}
               className="bg-transparent border-none outline-none font-bold text-sm text-gray-600 focus:ring-0 cursor-pointer"
             >
-              <option value="default">Sort by ID</option>
-              <option value="name-asc">Name (A-Z)</option>
-              <option value="name-desc">Name (Z-A)</option>
-              <option value="newest">Recent First</option>
-              <option value="oldest">Oldest First</option>
+              <option value="default">{t.sortById}</option>
+              <option value="name-asc">{t.nameAZ}</option>
+              <option value="name-desc">{t.nameZA}</option>
+              <option value="newest">{t.recentFirst}</option>
+              <option value="oldest">{t.oldestFirst}</option>
             </select>
           </div>
 
           <div className="ml-auto text-xs font-black text-gray-400 uppercase tracking-widest px-4">
-            Showing {paginatedSchemes.length} of {processedSchemes.length} results
+            {t.showing} {paginatedSchemes.length} {t.of} {processedSchemes.length} {t.results}
           </div>
         </div>
       </div>
@@ -166,20 +234,20 @@ export default function AllSchemes() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 gap-4">
             <div className="w-12 h-12 border-[4px] border-primary/20 border-t-primary rounded-full animate-spin" />
-            <p className="text-sm font-bold text-gray-400 uppercase tracking-[0.2em]">Synchronizing Registry...</p>
+            <p className="text-sm font-bold text-gray-400 uppercase tracking-[0.2em]">{t.synchronizing}</p>
           </div>
         ) : paginatedSchemes.length === 0 ? (
           <div className="bg-white rounded-[3rem] border border-dashed border-gray-200 p-20 text-center flex flex-col items-center">
             <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-6">
               <Search className="text-gray-300" size={32} />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">No matching schemes found</h3>
-            <p className="text-gray-500 max-w-sm font-medium">Try adjusting your search terms or filters to find what you're looking for.</p>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">{t.noSchemesFound}</h3>
+            <p className="text-gray-500 max-w-sm font-medium">{t.noSchemesDesc}</p>
             <button
               onClick={() => { setSearch(""); setCategoryFilter("All"); }}
               className="mt-8 px-8 py-3 bg-gray-900 text-white rounded-2xl font-bold hover:scale-105 transition-all shadow-xl shadow-gray-900/10"
             >
-              Clear All Filters
+              {t.clearAllFilters}
             </button>
           </div>
         ) : (
@@ -240,4 +308,3 @@ export default function AllSchemes() {
     </div>
   );
 }
-

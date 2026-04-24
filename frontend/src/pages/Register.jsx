@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useLang } from "../context/LanguageContext";
+import { translations } from "../utils/translations";
 
 export default function Register() {
+  const { lang } = useLang();
+  const t = translations[lang];
+
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState('');
@@ -30,7 +35,7 @@ export default function Register() {
       }
       
       setOtpSent(true);
-      setMessage('OTP sent to your email. Please verify to continue.');
+      setMessage(t.otpSent);
     } catch (err) {
       setError(err.message);
     }
@@ -54,7 +59,7 @@ export default function Register() {
         throw new Error(data.message || 'OTP verification failed');
       }
       
-      setMessage('Account verified successfully. Redirecting to log in...');
+      setMessage(t.verifiedSuccess);
       setTimeout(() => navigate('/login'), 2000);
       
     } catch (err) {
@@ -64,10 +69,10 @@ export default function Register() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col justify-center items-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 border border-blue-200 p-8 shadow-sm">
+      <div className="max-w-md w-full space-y-8 border border-blue-200 p-8 shadow-sm rounded-xl">
         <div>
           <h2 className="text-center text-3xl font-extrabold text-blue-900">
-            {otpSent ? 'Verify OTP' : 'Create an account'}
+            {otpSent ? t.verifyOtp : t.createAccount}
           </h2>
         </div>
         
@@ -78,34 +83,34 @@ export default function Register() {
           <form className="mt-8 space-y-6" onSubmit={handleRegister}>
             <div className="rounded-sm shadow-sm space-y-4">
               <div>
-                <label className="sr-only">Name</label>
+                <label className="sr-only">{t.fullName}</label>
                 <input
                   type="text"
                   required
-                  className="appearance-none relative block w-full px-3 py-2 border border-blue-300 placeholder-blue-400 text-blue-900 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                  placeholder="Full Name"
+                  className="appearance-none relative block w-full px-3 py-2 border border-blue-300 placeholder-blue-400 text-blue-900 focus:outline-none focus:ring-blue-500 sm:text-sm rounded-lg"
+                  placeholder={t.fullName}
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
                 />
               </div>
               <div>
-                <label className="sr-only">Email address</label>
+                <label className="sr-only">{t.emailAddress}</label>
                 <input
                   type="email"
                   required
-                  className="appearance-none relative block w-full px-3 py-2 border border-blue-300 placeholder-blue-400 text-blue-900 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                  placeholder="Email address"
+                  className="appearance-none relative block w-full px-3 py-2 border border-blue-300 placeholder-blue-400 text-blue-900 focus:outline-none focus:ring-blue-500 sm:text-sm rounded-lg"
+                  placeholder={t.emailAddress}
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                 />
               </div>
               <div>
-                <label className="sr-only">Password</label>
+                <label className="sr-only">{t.password}</label>
                 <input
                   type="password"
                   required
-                  className="appearance-none relative block w-full px-3 py-2 border border-blue-300 placeholder-blue-400 text-blue-900 focus:outline-none focus:ring-blue-500 sm:text-sm"
-                  placeholder="Password"
+                  className="appearance-none relative block w-full px-3 py-2 border border-blue-300 placeholder-blue-400 text-blue-900 focus:outline-none focus:ring-blue-500 sm:text-sm rounded-lg"
+                  placeholder={t.password}
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
                 />
@@ -115,14 +120,14 @@ export default function Register() {
             <div>
               <button
                 type="submit"
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors rounded-lg"
               >
-                Register
+                {t.register}
               </button>
             </div>
             <div className="text-sm text-center">
               <Link to="/login" className="font-medium text-blue-600 hover:text-blue-800">
-                Already have an account? Log in here.
+                {t.alreadyHaveAccount}
               </Link>
             </div>
           </form>
@@ -130,12 +135,12 @@ export default function Register() {
           <form className="mt-8 space-y-6" onSubmit={handleVerifyOtp}>
             <div className="rounded-sm shadow-sm space-y-4">
               <div>
-                <label className="sr-only">OTP</label>
+                <label className="sr-only">{t.verifyOtp}</label>
                 <input
                   type="text"
                   required
-                  className="appearance-none relative block w-full px-3 py-2 border border-blue-300 placeholder-blue-400 text-blue-900 focus:outline-none focus:ring-blue-500 sm:text-sm text-center tracking-widest text-lg"
-                  placeholder="Enter 6-digit OTP"
+                  className="appearance-none relative block w-full px-3 py-2 border border-blue-300 placeholder-blue-400 text-blue-900 focus:outline-none focus:ring-blue-500 sm:text-sm text-center tracking-widest text-lg rounded-lg"
+                  placeholder={t.enterOtp}
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
                   maxLength={6}
@@ -146,9 +151,9 @@ export default function Register() {
             <div>
               <button
                 type="submit"
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors rounded-lg"
               >
-                Verify & complete registration
+                {t.verifyComplete}
               </button>
             </div>
           </form>

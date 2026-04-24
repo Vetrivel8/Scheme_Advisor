@@ -1,7 +1,12 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useLang } from "../context/LanguageContext";
+import { translations } from "../utils/translations";
 
 export default function Login() {
+  const { lang } = useLang();
+  const t = translations[lang];
+
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const location = useLocation();
@@ -21,18 +26,16 @@ export default function Login() {
       const data = await res.json();
       
       if (!res.ok) {
-        throw new Error(data.message || 'Login failed');
+        throw new Error(data.message || t.loginFailed);
       }
       
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
       
-      // Check if we have a redirect target in state, otherwise go to home or wizard
-      // For this specific request, we'll try to go to wizard if they were coming from "Find Schemes"
       const from = location.state?.from || '/';
       window.location.href = from;
     } catch (err) {
-      setError(err.message);
+      setError(err.message === t.loginFailed ? err.message : t.loginFailed);
     }
   };
 
@@ -44,10 +47,10 @@ export default function Login() {
              <span className="text-white font-black text-2xl leading-none">S</span>
           </div>
           <h2 className="text-4xl font-extrabold text-primary tracking-tighter mb-2">
-            Welcome Back
+            {t.welcomeBack}
           </h2>
           <p className="text-on-surface-variant font-medium leading-relaxed">
-            Resume your journey to discovered support.
+            {t.resumeJourney}
           </p>
         </div>
         
@@ -60,7 +63,7 @@ export default function Login() {
         <form className="space-y-8" onSubmit={handleLogin}>
           <div className="space-y-6">
             <div className="group">
-              <label className="block text-[10px] font-bold text-primary mb-2 uppercase tracking-[0.2em] ml-1 opacity-70">Email Access</label>
+              <label className="block text-[10px] font-bold text-primary mb-2 uppercase tracking-[0.2em] ml-1 opacity-70">{t.emailAccess}</label>
               <input
                 type="email"
                 required
@@ -74,7 +77,7 @@ export default function Login() {
               />
             </div>
             <div className="group">
-              <label className="block text-[10px] font-bold text-primary mb-2 uppercase tracking-[0.2em] ml-1 opacity-70">Identity Key</label>
+              <label className="block text-[10px] font-bold text-primary mb-2 uppercase tracking-[0.2em] ml-1 opacity-70">{t.identityKey}</label>
               <input
                 type="password"
                 required
@@ -97,13 +100,13 @@ export default function Login() {
                          hover:scale-[1.02] active:scale-[0.98] 
                          transition-all duration-300"
             >
-              Sign In
+              {t.signIn}
             </button>
           </div>
           
           <div className="text-center mt-8">
             <Link to="/register" className="text-sm font-bold text-primary/70 hover:text-primary transition-colors tracking-wide underline underline-offset-8 decoration-primary/20">
-              New explorer? Create an account here.
+              {t.newExplorer}
             </Link>
           </div>
         </form>
@@ -111,4 +114,3 @@ export default function Login() {
     </div>
   );
 }
-

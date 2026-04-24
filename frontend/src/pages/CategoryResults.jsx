@@ -2,11 +2,15 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import SchemeCard from "../components/SchemeCard";
 import axios from "../api/axios";
+import { useLang } from "../context/LanguageContext";
+import { translations } from "../utils/translations";
 
 export default function CategoryResults() {
   const { category } = useParams();
   const [schemes, setSchemes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { lang } = useLang();
+  const t = translations[lang];
 
   useEffect(() => {
     const fetchSchemes = async () => {
@@ -29,16 +33,18 @@ export default function CategoryResults() {
     fetchSchemes();
   }, [category]);
 
+  const translatedCategory = translations[lang][category.toLowerCase()] || category;
+
   return (
     <div className="min-h-screen bg-gray-50 px-6 py-10">
       
       {/* Page Header */}
       <div className="max-w-7xl mx-auto mb-10">
         <h2 className="text-3xl font-bold text-gray-800 capitalize">
-          {category} Schemes
+          {translatedCategory} {t.schemesUnder}
         </h2>
         <p className="text-gray-500 mt-2">
-          Browse government schemes available under the {category} category.
+          {t.browseUnder} {translatedCategory} {t.categoryLabel}
         </p>
       </div>
 
@@ -53,10 +59,10 @@ export default function CategoryResults() {
           /* Empty State */
           <div className="bg-white border border-gray-200 rounded-xl p-10 text-center shadow-sm">
             <h3 className="text-lg font-semibold text-gray-700">
-              No schemes available
+              {t.noSchemesAvailable}
             </h3>
             <p className="text-gray-500 mt-2">
-              Currently there are no schemes under this category.
+              {t.noSchemesCategory}
             </p>
           </div>
 

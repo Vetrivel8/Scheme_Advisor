@@ -7,18 +7,22 @@ import {
   HeartPulse,
   HandHeart,
 } from "lucide-react";
+import { useLang } from "../context/LanguageContext";
+import { translations } from "../utils/translations";
 
-const categories = [
-  { name: "Agriculture", icon: Sprout, color: "text-secondary", bg: "bg-secondary-container" },
-  { name: "Education", icon: GraduationCap, color: "text-primary", bg: "bg-primary-container" },
-  { name: "Women", icon: User, color: "text-tertiary", bg: "bg-tertiary-container" },
-  { name: "Employment", icon: Briefcase, color: "text-primary", bg: "bg-primary-fixed" },
-  { name: "Health", icon: HeartPulse, color: "text-error", bg: "bg-error-container" },
-  { name: "Social Welfare", icon: HandHeart, color: "text-secondary", bg: "bg-secondary-fixed" },
-];
-
-export default function CategoryCards() {
+export default function CategoryCards({ horizontal }) {
   const navigate = useNavigate();
+  const { lang } = useLang();
+  const t = translations[lang];
+
+  const categories = [
+    { id: "Agriculture", name: t.agriculture, icon: Sprout, color: "text-secondary", bg: "bg-secondary-container" },
+    { id: "Education", name: t.education, icon: GraduationCap, color: "text-primary", bg: "bg-primary-container" },
+    { id: "Women", name: t.women, icon: User, color: "text-tertiary", bg: "bg-tertiary-container" },
+    { id: "Employment", name: t.employment, icon: Briefcase, color: "text-primary", bg: "bg-primary-fixed" },
+    { id: "Health", name: t.health, icon: HeartPulse, color: "text-error", bg: "bg-error-container" },
+    { id: "Social Welfare", name: t.socialWelfare, icon: HandHeart, color: "text-secondary", bg: "bg-secondary-fixed" },
+  ];
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
@@ -27,8 +31,8 @@ export default function CategoryCards() {
 
         return (
           <div
-            key={cat.name}
-            onClick={() => navigate(`/category/${cat.name}`)}
+            key={cat.id}
+            onClick={() => navigate(`/category/${cat.id}`)}
             className="card-tonal flex flex-col items-center justify-center text-center cursor-pointer group"
           >
             {/* Icon Circle */}
@@ -52,4 +56,3 @@ export default function CategoryCards() {
     </div>
   );
 }
-
